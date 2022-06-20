@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -6,7 +7,7 @@ namespace Xbox360GoDPatcher
 {
     public partial class MainWindow : Form
     {
-        private const int StartAddress = 556;
+        private const int StartAddress = 556; // 0x22C
         private const int FFCount = 8;
         private const int ZeroCount = 7;
         private const int LengthRequirement = 580;
@@ -111,7 +112,31 @@ namespace Xbox360GoDPatcher
 
         private static PatchStatus PatchFile(FileInfo fi)
         {
-            return PatchStatus.UnknownFail;
+            try
+            {
+                if (fi.Length < LengthRequirement)
+                    return PatchStatus.FailedFileTooSmall;
+
+                var bytes = File.ReadAllBytes(fi.FullName);
+
+                var pointer = StartAddress;
+
+                for (var i = pointer; i < pointer + FFCount; i++)
+                    bytes[i] = 238;
+
+                pointer += FFCount;
+
+                for (var i = pointer; i < pointer + ZeroCount; i++)
+                    bytes[i] = 221;
+
+                File.WriteAllBytes(fi.FullName, bytes);
+
+                return PatchStatus.Patched;
+            }
+            catch
+            {
+                return PatchStatus.UnknownFail;
+            }
         }
     }
 }
