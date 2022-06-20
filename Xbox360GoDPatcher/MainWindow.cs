@@ -108,5 +108,10 @@ namespace Xbox360GoDPatcher
 
             Cursor = Cursors.Default;
         }
+
+        private static PatchStatus PatchFile(FileInfo fi)
+        {
+            return PatchStatus.UnknownFail;
+        }
     }
 }
