@@ -76,7 +76,7 @@ namespace Xbox360GoDPatcher
         private static bool CheckFilename(string filename) =>
             Regex.IsMatch(filename, "^[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]$");
 
-        private void selectNotPatchedToolStripMenuItem_Click(object sender, System.EventArgs e)
+        private void selectNotPatchedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             listView1.SelectedItems.Clear();
             foreach (ListViewItem i in listView1.Items)
@@ -88,7 +88,7 @@ namespace Xbox360GoDPatcher
             }
         }
 
-        private void patchToolStripMenuItem_Click(object sender, System.EventArgs e)
+        private void patchToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var success = 0;
             var fail = 0;
@@ -101,6 +101,11 @@ namespace Xbox360GoDPatcher
 
                 var result = PatchFile(fi);
 
+                if (result == PatchStatus.Patched)
+                    success++;
+                else
+                    fail++;
+
                 i.SubItems[1].Tag = result;
                 i.SubItems[1].Text = PatchStatusAsString(result);
 
@@ -108,6 +113,8 @@ namespace Xbox360GoDPatcher
             }
 
             Cursor = Cursors.Default;
+
+            MessageBox.Show($"Success: {success}\nFail: {fail}", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private static PatchStatus PatchFile(FileInfo fi)
@@ -122,12 +129,12 @@ namespace Xbox360GoDPatcher
                 var pointer = StartAddress;
 
                 for (var i = pointer; i < pointer + FFCount; i++)
-                    bytes[i] = 238;
+                    bytes[i] = 255;
 
                 pointer += FFCount;
 
                 for (var i = pointer; i < pointer + ZeroCount; i++)
-                    bytes[i] = 221;
+                    bytes[i] = 0;
 
                 File.WriteAllBytes(fi.FullName, bytes);
 
